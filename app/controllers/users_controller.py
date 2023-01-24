@@ -22,7 +22,9 @@ def showAllUsers():
             "gender": items.gender,
         }
         result.append(user)
-    return jsonify(result)
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 def showUserById(userid):
@@ -37,7 +39,9 @@ def showUserById(userid):
         "birth_date": dbresult.birth_date,
         "gender": dbresult.gender,
     }
-    return jsonify(user)
+    response = jsonify(user)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @jwt_required()
@@ -54,7 +58,9 @@ def showUserData():
         "birth_date": dbresult.birth_date,
         "gender": dbresult.gender,
     }
-    return jsonify(user)
+    response = jsonify(user)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 def generateToken(**param):
@@ -89,16 +95,34 @@ def generateToken(**param):
         data = {
             "message": "Email tidak terdaftar"
         }
-    return jsonify(data)
+    response = jsonify(data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 def insertUser(**params):
-    uid = uuid.uuid4().hex
-    newUser = Users(
-        id=uid,
-        email=params['email'],
-        password=sha256_crypt.encrypt(params['password']),
-    )
-    session.add(newUser)
-    session.commit()
-    return jsonify({"message": "Insert User Succes"})
+    users = session.query(Users).all()
+    emailList = []
+    for items in users:
+        emailList.append(items.email)
+
+    if params['email'] in emailList:
+        data = {
+            "message": "Email already exist in the database"
+        }
+    else:
+        uid = uuid.uuid4().hex
+        newUser = Users(
+            userid=uid,
+            email=params['email'],
+            password=sha256_crypt.encrypt(params['password']),
+        )
+        session.add(newUser)
+        session.commit()
+        data = {
+            "message": "Insert user success"
+        }
+
+    response = jsonify(data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
