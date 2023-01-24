@@ -1,0 +1,1 @@
+from app.models.tourisms_model import Tourisms, UserPlans, Plans
