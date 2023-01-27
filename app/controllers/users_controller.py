@@ -44,25 +44,6 @@ def showUserById(userid):
     return response
 
 
-@jwt_required()
-def showUserData():
-    current = get_jwt_identity()
-    dbresult = session.query(Users).filter(
-        Users.id == current['id']).one()
-    user = {
-        "id": dbresult.id,
-        "username": dbresult.username,
-        "email": dbresult.email,
-        "password": dbresult.password,
-        "prof_pic": dbresult.prof_pic,
-        "birth_date": dbresult.birth_date,
-        "gender": dbresult.gender,
-    }
-    response = jsonify(user)
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
-
-
 def generateToken(**param):
     dbresult = session.query(Users).filter(
         Users.email == param['email']).first()
@@ -113,7 +94,7 @@ def insertUser(**params):
     else:
         uid = uuid.uuid4().hex
         newUser = Users(
-            userid=uid,
+            id=uid,
             email=params['email'],
             password=sha256_crypt.encrypt(params['password']),
         )

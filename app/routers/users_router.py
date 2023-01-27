@@ -14,12 +14,13 @@ def main():
 def showAllUsers():
     return users_controller.showAllUsers()
 
+
 @app.route("/user/profile", methods=["GET"])
 def showAUserProfile():
     return users_controller.showUserData()
 
 
-@app.route("/user/<string:userid>", methods=["POST"])
+@app.route("/user/<string:userid>", methods=["GET"])
 def showUserById(userid):
     return users_controller.showUserById(userid)
 
@@ -31,6 +32,6 @@ def requestToken():
 
 
 @app.route("/user/insert", methods=["POST"])
-def tambahData():
+def addUser():
     params = request.json
     return users_controller.insertUser(**params)
