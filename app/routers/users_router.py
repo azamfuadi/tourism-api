@@ -20,6 +20,12 @@ def showAUserProfile():
     return users_controller.showUserData()
 
 
+@app.route("/user/update", methods=["POST"])
+def editUser():
+    params = request.json
+    return users_controller.updateUser(**params)
+
+
 @app.route("/user/<string:userid>", methods=["GET"])
 def showUserById(userid):
     return users_controller.showUserById(userid)

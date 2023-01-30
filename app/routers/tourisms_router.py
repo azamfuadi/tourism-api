@@ -22,6 +22,23 @@ def addTourismPlan():
     return tourisms_controller.createPlan(**params)
 
 
+@app.route("/tourismplan/update", methods=["POST"])
+def updateTourismPlan():
+    params = request.json
+    return tourisms_controller.updateUserPlan(**params)
+
+
 @app.route("/tourismplans/<string:userid>", methods=["GET"])
 def showTourismPlansbyUserId(userid):
     return tourisms_controller.showUserPlan(userid)
+
+
+@app.route("/tourismplan/<string:plan_id>", methods=["GET"])
+def showTourismPlansbyId(plan_id):
+    return tourisms_controller.showPlanById(plan_id)
+
+
+@app.route("/plancontributor/insert", methods=["POST"])
+def addPlanContributor():
+    params = request.json
+    return tourisms_controller.addContributor(**params)

@@ -30,6 +30,7 @@ class Plans(Base):
     __tablename__ = 'plans'
     id = Column(String(32), primary_key=True, nullable=False)
     name = Column(String(255), nullable=False)
+    creator_email = Column(String(255), nullable=False)
     note = Column(String(255), nullable=True)
     itinerary = Column(String(255), nullable=True)
     start_date = Column(DateTime, nullable=True)

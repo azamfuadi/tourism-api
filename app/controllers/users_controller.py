@@ -44,6 +44,97 @@ def showUserById(userid):
     return response
 
 
+@jwt_required()
+def updateUser(**params):
+    current = get_jwt_identity()
+
+    if params['username'] != '':
+        if isinstance(params['username'], list):
+            if len(params['username']) == 0:
+                username = current['username']
+            else:
+                username = params['username'][0]
+        else:
+            username = params['username']
+    else:
+        username = current['username']
+
+    if params['prof_pic'] != '':
+        if isinstance(params['prof_pic'], list):
+            if len(params['prof_pic']) == 0:
+                prof_pic = current['prof_pic']
+            else:
+                prof_pic = params['prof_pic'][0]
+        else:
+            prof_pic = params['prof_pic']
+    else:
+        prof_pic = current['prof_pic']
+
+    if params['birth_date'] != '':
+        if isinstance(params['birth_date'], list):
+            if len(params['birth_date']) == 0:
+                birth_date = current['birth_date']
+            else:
+                birth_date = params['birth_date'][0]
+        else:
+            birth_date = params['birth_date']
+    else:
+        birth_date = current['birth_date']
+
+    if params['gender'] != '':
+        if isinstance(params['gender'], list):
+            if len(params['gender']) == 0:
+                gender = current['gender']
+            else:
+                gender = params['gender'][0]
+        else:
+            gender = params['gender']
+    else:
+        gender = current['gender']
+
+    if params['passwordnew'] != '':
+        authenticated = sha256_crypt.verify(
+            params['password'], current['password'])
+        if authenticated:
+            if isinstance(params['passwordnew'], list):
+                if len(params['passwordnew']) == 0:
+                    passwordnew = current['passwordnew']
+            else:
+                passwordnew = params['passwordnew'][0]
+            session.query(Users).filter(
+                Users.id == current['id']).update({
+                    "username": username,
+                    "password": sha256_crypt.encrypt(passwordnew),
+                    "prof_pic": prof_pic,
+                    "birth_date": birth_date,
+                    "gender": gender,
+                })
+            session.commit()
+            data = {
+                "message": "Update User Data Success"
+            }
+        else:
+            data = {
+                "message": "Wrong Password Verification for Password Changing"
+            }
+    else:
+        session.query(Users).filter(
+            Users.id == current['id']).update({
+                "username": username,
+                "prof_pic": prof_pic,
+                "birth_date": birth_date,
+                "gender": gender,
+            })
+        session.commit()
+        data = {
+            "message": "Update User Data Success"
+        }
+
+    response = jsonify(data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
 def generateToken(**param):
     dbresult = session.query(Users).filter(
         Users.email == param['email']).first()
@@ -54,6 +145,7 @@ def generateToken(**param):
             user = {
                 "id": dbresult.id,
                 "username": dbresult.username,
+                "password": dbresult.password,
                 "email": dbresult.email,
                 "prof_pic": dbresult.prof_pic,
                 "birth_date": dbresult.birth_date,
