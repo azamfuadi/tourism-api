@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_jwt_extended import *
 import datetime
 import uuid
-from app.models.tourisms_model import Tourisms, UserPlans, Plans
+from app.models.tourisms_model import Tourisms, Plans, UserPlans, TourismPlans
 from app.models.users_model import Users
 
 
@@ -65,17 +65,14 @@ def createPlan(**params):
         id=uid,
         name=params['name'],
         note=params['note'],
-        itinerary=params['itinerary'],
+        destination=params['destination'],
         start_date=params['start_date'],
         finish_date=params['finish_date'],
-        tourism_id=params['tourism_id'],
     )
     session.add(newPlan)
     session.commit()
 
-    uid2 = uuid.uuid4().hex
     newUserPlan = UserPlans(
-        id=uid2,
         plan_id=uid,
         user_id=current['id'],
         user_role='Creator',
@@ -93,19 +90,18 @@ def createPlan(**params):
 
 
 def showUserPlan(userid):
-    userplans = session.query(UserPlans, Plans).join(Plans).filter(
+    userplans = session.query(UserPlans).filter(
         UserPlans.user_id == userid).all()
     result = []
     if userplans is not None:
         for items in userplans:
             userPlan = {
-                "plan_id": items.Plans.id,
-                "name": items.Plans.name,
-                "creator_email": items.Plans.creator_email,
-                "note": items.Plans.note,
-                "itinerary": items.Plans.itinerary,
-                "start_date": items.Plans.start_date,
-                "finish_date": items.Plans.finish_date,
+                "plan_id": items.plans.id,
+                "name": items.plans.name,
+                "note": items.plans.note,
+                "destination": items.plans.destination,
+                "start_date": items.plans.start_date,
+                "finish_date": items.plans.finish_date,
             }
             result.append(userPlan)
     response = jsonify(result)
@@ -117,41 +113,55 @@ def showPlanById(plan_id):
     dbresult = session.query(Plans).filter(
         Plans.id == plan_id).one()
 
-    # looking for creator data
-    cresult = session.query(Users).filter(
-        Users.email == dbresult.creator_email).one()
-    creator = {
-        "user_id": cresult.id,
-        "email": cresult.email,
-        "username": cresult.username,
-        "prof_pic": cresult.prof_pic,
-    }
-
-    # looking for contributor data
-    cont_users = session.query(UserPlans, Users).join(Users).filter(
-        UserPlans.plan_id == plan_id).all()
+    # looking for contributor and creator data
+    creator = {}
     contributors = []
-    if cont_users is not None:
-        for items in cont_users:
-            if items.Users.email != dbresult.creator_email:
-                user_cont = {
-                    "user_id": items.Users.id,
-                    "email": items.Users.email,
-                    "username": items.Users.username,
-                    "prof_pic": items.Users.prof_pic,
-                }
-                contributors.append(user_cont)
+    cont_users = session.query(UserPlans).filter(
+        UserPlans.plan_id == plan_id).all()
+    for item in cont_users:
+        if item.user_role == "Contributor":
+            user_cont = {
+                "user_id": item.users.id,
+                "email": item.users.email,
+                "username": item.users.username,
+                "prof_pic": item.users.prof_pic,
+                "user_role": item.user_role,
+            }
+            contributors.append(user_cont)
+        else:
+            creator["user_id"] = item.users.id
+            creator["email"] = item.users.email
+            creator["username"] = item.users.username
+            creator["prof_pic"] = item.users.prof_pic
+            creator["user_role"] = item.user_role
+
+    # looking for tourism data
+    tourisms = []
+    plan_tour = session.query(TourismPlans).filter(
+        TourismPlans.plan_id == plan_id).all()
+    for item in plan_tour:
+        tour = {
+            "tourism_id": item.tourisms.id,
+            "name": item.tourisms.name,
+            "description": item.tourisms.description,
+            "address": item.tourisms.address,
+            "location": item.tourisms.location,
+            "img_url": item.tourisms.img_url,
+            "date": item.date,
+        }
+        tourisms.append(tour)
 
     # creating plan data
     plan = {
         "id": dbresult.id,
         "name": dbresult.name,
         "creator": creator,
-        "contributor": contributors,
+        "contributors": contributors,
         "note": dbresult.note,
-        "itinerary": dbresult.itinerary,
+        "destination": dbresult.destination,
         "start_date": dbresult.start_date,
         "finish_date": dbresult.finish_date,
+        "tourisms": tourisms,
     }
     response = jsonify(plan)
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -185,16 +195,16 @@ def updateUserPlan(**params):
     else:
         note = dbresult.note
 
-    if params['itinerary'] != '':
-        if isinstance(params['itinerary'], list):
-            if len(params['itinerary']) == 0:
-                itinerary = dbresult.itinerary
+    if params['destination'] != '':
+        if isinstance(params['destination'], list):
+            if len(params['destination']) == 0:
+                destination = dbresult.destination
             else:
-                itinerary = params['itinerary'][0]
+                destination = params['destination'][0]
         else:
-            itinerary = params['itinerary']
+            destination = params['destination']
     else:
-        itinerary = dbresult.itinerary
+        destination = dbresult.destination
 
     if params['start_date'] != '':
         if isinstance(params['start_date'], list):
@@ -222,7 +232,7 @@ def updateUserPlan(**params):
         Plans.id == params['plan_id']).update({
             "name": name,
             "note": note,
-            "itinerary": itinerary,
+            "destination": destination,
             "start_date": start_date,
             "finish_date": finish_date,
         })
@@ -251,11 +261,40 @@ def addContributor(**params):
         newUserPlan = UserPlans(
             plan_id=params['plan_id'],
             user_id=params['user_id'],
+            user_role='Contributor',
         )
         session.add(newUserPlan)
         session.commit()
         data = {
             "message": "Add New User as Contributor Success"
+        }
+
+    response = jsonify(data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+def addTourismToPlan(**params):
+    plans = session.query(TourismPlans, Tourisms).join(Tourisms).filter(
+        TourismPlans.plan_id == params['plan_id']).all()
+    tourismList = []
+    for items in plans:
+        tourismList.append(items.TourismPlans.tourism_id)
+
+    if params['tourism_id'] in tourismList:
+        data = {
+            "message": "Tourism Already Exist"
+        }
+    else:
+        newTourismPlan = TourismPlans(
+            plan_id=params['plan_id'],
+            tourism_id=params['tourism_id'],
+            date=params['date'],
+        )
+        session.add(newTourismPlan)
+        session.commit()
+        data = {
+            "message": "Add New Tourism to Plan Success"
         }
 
     response = jsonify(data)

@@ -16,8 +16,8 @@ def addTourism():
     return tourisms_controller.insertTourism(**params)
 
 
-@app.route("/tourismplan/insert", methods=["POST"])
-def addTourismPlan():
+@app.route("/plan/insert", methods=["POST"])
+def addPlan():
     params = request.json
     return tourisms_controller.createPlan(**params)
 
@@ -42,3 +42,9 @@ def showTourismPlansbyId(plan_id):
 def addPlanContributor():
     params = request.json
     return tourisms_controller.addContributor(**params)
+
+
+@app.route("/plantourism/insert", methods=["POST"])
+def addPlanTourism():
+    params = request.json
+    return tourisms_controller.addTourismToPlan(**params)
