@@ -96,11 +96,7 @@ def updateUser(**params):
         authenticated = sha256_crypt.verify(
             params['password'], current['password'])
         if authenticated:
-            if isinstance(params['passwordnew'], list):
-                if len(params['passwordnew']) == 0:
-                    passwordnew = current['passwordnew']
-            else:
-                passwordnew = params['passwordnew'][0]
+            passwordnew = params['passwordnew']
             session.query(Users).filter(
                 Users.id == current['id']).update({
                     "username": username,
