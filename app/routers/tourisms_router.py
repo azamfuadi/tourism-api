@@ -10,6 +10,11 @@ def showAllTourisms():
     return tourisms_controller.showAllTourisms()
 
 
+@app.route("/tourism/<string:tourismid>", methods=["GET"])
+def showTourismbyId(tourismid):
+    return tourisms_controller.showTourism(tourismid)
+
+
 @app.route("/tourism/insert", methods=["POST"])
 def addTourism():
     params = request.json

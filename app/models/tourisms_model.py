@@ -37,6 +37,8 @@ class Tourisms(Base):
     location = Column(String(255), nullable=True)
     address = Column(String(255), nullable=True)
     img_url = Column(String(255), nullable=True)
+    contact = Column(String(50), nullable=True)
+    schedule = Column(String(200), nullable=True)
 
     plans = relationship("TourismPlans", back_populates="tourisms")
 

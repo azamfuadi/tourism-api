@@ -25,6 +25,8 @@ def insertTourism(**params):
             description=params['description'],
             location=params['location'],
             address=params['address'],
+            contact=params['contact'],
+            schedule=params['schedule'],
             img_url=params['img_url'],
         )
         session.add(newTourism)
@@ -48,10 +50,29 @@ def showAllTourisms():
             "description": items.description,
             "location": items.location,
             "address": items.address,
+            "contact": items.contact,
+            "schedule": items.schedule,
             "img_url": items.img_url,
         }
         result.append(tourism)
     response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+def showTourism(tourismid):
+    dbresult = session.query(Tourisms).filter(Tourisms.id == tourismid).one()
+    tourism = {
+        "id": dbresult.id,
+        "name": dbresult.name,
+        "description": dbresult.description,
+        "location": dbresult.location,
+        "address": dbresult.address,
+        "contact": dbresult.contact,
+        "schedule": dbresult.schedule,
+        "img_url": dbresult.img_url,
+    }
+    response = jsonify(tourism)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
