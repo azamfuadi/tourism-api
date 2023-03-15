@@ -11,17 +11,17 @@ from config import Config
 from flask import Flask
 
 engine = create_engine(
-    'mysql+mysqlconnector://root:@localhost:3306', echo=True)
+    'mysql+mysqlconnector://freedb_alpamon1:S?U5!?#V2jC4shj@sql.freedb.tech:3306', echo=True)
 existing_databases = engine.execute("SHOW DATABASES;")
 # Results are a list of single item tuples, so unpack each tuple
 existing_databases = [d[0] for d in existing_databases]
 
 # Create database if not exists
-if 'tourism' not in existing_databases:
-    engine.execute("CREATE DATABASE tourism")
-    print("Created database tourism")
+if 'freedb_tourism' not in existing_databases:
+    engine.execute("CREATE DATABASE freedb_tourism")
+    print("Created database freedb_tourism")
 
-url = 'mysql+mysqlconnector://root:@localhost:3306/tourism'
+url = 'mysql+mysqlconnector://freedb_alpamon1:S?U5!?#V2jC4shj@sql.freedb.tech:3306/freedb_tourism'
 Base = declarative_base()
 mysql_engine = create_engine(url, echo=True)
 session_factory = sessionmaker(bind=mysql_engine)
