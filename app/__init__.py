@@ -10,16 +10,16 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from flask import Flask
 
-engine = create_engine(
-    'mysql+mysqlconnector://dbmasteruser:oY_w+vBkOJ9wW#qO087d!G>_?7[`X7}]@ls-e43f932a72e8734b573077e2ac603a69c356c1ed.cpobec3ma8he.ap-southeast-1.rds.amazonaws.com:3306', echo=True)
-existing_databases = engine.execute("SHOW DATABASES;")
-# Results are a list of single item tuples, so unpack each tuple
-existing_databases = [d[0] for d in existing_databases]
+# engine = create_engine(
+#     'mysql+mysqlconnector://dbmasteruser:oY_w+vBkOJ9wW#qO087d!G>_?7[`X7}]@ls-e43f932a72e8734b573077e2ac603a69c356c1ed.cpobec3ma8he.ap-southeast-1.rds.amazonaws.com:3306', echo=True)
+# existing_databases = engine.execute("SHOW DATABASES;")
+# # Results are a list of single item tuples, so unpack each tuple
+# existing_databases = [d[0] for d in existing_databases]
 
-# Create database if not exists
-if 'tourism' not in existing_databases:
-    engine.execute("CREATE DATABASE tourism")
-    print("Created database tourism")
+# # Create database if not exists
+# if 'tourism' not in existing_databases:
+#     engine.execute("CREATE DATABASE tourism")
+#     print("Created database tourism")
 
 url = 'mysql+mysqlconnector://dbmasteruser:oY_w+vBkOJ9wW#qO087d!G>_?7[`X7}]@ls-e43f932a72e8734b573077e2ac603a69c356c1ed.cpobec3ma8he.ap-southeast-1.rds.amazonaws.com:3306/tourism'
 Base = declarative_base()
