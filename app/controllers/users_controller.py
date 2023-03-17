@@ -147,7 +147,7 @@ def generateToken(**param):
                 "birth_date": dbresult.birth_date,
                 "gender": dbresult.gender,
             }
-            expires = datetime.timedelta(days=1)
+            expires = datetime.timedelta(days=3)
             expires_refresh = datetime.timedelta(days=3)
             access_token = create_access_token(
                 user, fresh=True, expires_delta=expires)
